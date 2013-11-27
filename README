@@ -1,21 +1,20 @@
-1. Add the following lines somewhere near the other module definitions (around line 250) in file src/Makefile.am:
+1. Copy mod_mysql_accesslog.c into the src directory.
 
-  lib_LTLIBRARIES += mod_mysql_accesslog.la
-  mod_mysql_accesslog_la_SOURCES = mod_mysql_accesslog.c
-  mod_mysql_accesslog_la_LDFLAGS = -module -export-dynamic -avoid-version -no-undefined
-  mod_mysql_accesslog_la_LIBADD = $(MYSQL_LIBS) $(common_libadd)
-  mod_mysql_accesslog_la_CPPFLAGS = $(MYSQL_INCLUDE)
+2. Apply the autotools patch:
 
-2. Copy mod_mysql_accesslog.c into the src directory.
+patch -p1 < 0001-Add-mod_mysql_accesslog-to-stock-1.4.33.patch
 
-3. Run the following commands in the base directory of lighttpd:
+3. Run the following command to regenerate configure script:
+./autogen.sh
+
+4. Run the following commands in the base directory of lighttpd:
 
 ./configure --with-mysql ...
 make clean
 make
 make install
 
-4. Create the database table
+5. Create the database table
 
 CREATE TABLE accesslog (
   remote_host int(10) unsigned,
@@ -54,4 +53,4 @@ mysql-accesslog.sock = "/tmp/mysql.sock"
 #mysql-accesslog.host = "192.168.10.100"
 
 # MySQL query to be executed
-mysql-accesslog.query = "INSERT INTO accesslog SET remote_host=%h timestamp=%t, status=%s, header=%{User-Agent}i, query_string=%q, url=%U"
+mysql-accesslog.query = "INSERT INTO accesslog SET remote_host=%h, timestamp=%t, status=%s, header=%{User-Agent}i, query_string=%q, url=%U"

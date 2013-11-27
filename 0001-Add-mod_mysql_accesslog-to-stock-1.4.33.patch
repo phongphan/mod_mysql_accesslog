@@ -1,0 +1,27 @@
+diff -ur lighttpd-1.4.33-old/configure.ac lighttpd-1.4.33-new/configure.ac
+--- lighttpd-1.4.33-old/configure.ac	2013-08-29 04:11:41.000000000 +0700
++++ lighttpd-1.4.33-new/configure.ac	2013-11-27 20:33:18.683111532 +0700
+@@ -665,7 +665,7 @@
+ 	disable_feature="$features"
+ fi
+ 
+-plugins="mod_mysql_vhost"
++plugins="mod_mysql_vhost mod_mysql_accesslog"
+ if test ! "x$MYSQL_LIBS" = x; then
+ 	do_build="$do_build $plugins"
+ else
+diff -ur lighttpd-1.4.33-old/src/Makefile.am lighttpd-1.4.33-new/src/Makefile.am
+--- lighttpd-1.4.33-old/src/Makefile.am	2013-05-15 17:07:04.000000000 +0700
++++ lighttpd-1.4.33-new/src/Makefile.am	2013-11-27 20:33:18.683111532 +0700
+@@ -265,6 +265,11 @@
+ mod_accesslog_la_LDFLAGS = -module -export-dynamic -avoid-version -no-undefined
+ mod_accesslog_la_LIBADD = $(common_libadd)
+ 
++lib_LTLIBRARIES += mod_mysql_accesslog.la
++mod_mysql_accesslog_la_SOURCES = mod_mysql_accesslog.c
++mod_mysql_accesslog_la_LDFLAGS = -module -export-dynamic -avoid-version -no-undefined
++mod_mysql_accesslog_la_LIBADD = $(MYSQL_LIBS) $(common_libadd)
++mod_mysql_accesslog_la_CPPFLAGS = $(MYSQL_INCLUDE)
+ 
+ hdr = server.h buffer.h network.h log.h keyvalue.h \
+       response.h request.h fastcgi.h chunk.h \

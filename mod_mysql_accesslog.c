@@ -514,7 +514,7 @@ REQUESTDONE_FUNC(mod_mysql_accesslog_write)
 	}
 
 	if (mysql_stmt_prepare(stmt, p->conf.format_query->ptr, p->conf.format_query->used - 1)) {
-        log_error_write(srv, __FILE__, __LINE__, "sss", "Cannot prepare SQL statement (%s). %s", p->conf.format_query->ptr, mysql_stmt_error(stmt));
+		log_error_write(srv, __FILE__, __LINE__, "sss", "Cannot prepare SQL statement (%s). %s", p->conf.format_query->ptr, mysql_stmt_error(stmt));
 		return HANDLER_ERROR;
 	}
 

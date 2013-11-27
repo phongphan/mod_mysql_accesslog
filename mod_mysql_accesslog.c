@@ -489,7 +489,7 @@ REQUESTDONE_FUNC(mod_mysql_accesslog_write)
 
 	size_t j;
 
-	data_string *request_header, *response_header, *environment;
+	data_string *request_header, *response_header, *environment, *ds;
 
 	MYSQL_BIND *b;
 	MYSQL_STMT *stmt;
@@ -509,10 +509,12 @@ REQUESTDONE_FUNC(mod_mysql_accesslog_write)
 	}
 
 	if (!(stmt = mysql_stmt_init(p->conf.mysql))) {
+		log_error_write(srv, __FILE__, __LINE__, "s", "Cannot initiate SQL statement.");
 		return HANDLER_ERROR;
 	}
 
 	if (mysql_stmt_prepare(stmt, p->conf.format_query->ptr, p->conf.format_query->used - 1)) {
+        log_error_write(srv, __FILE__, __LINE__, "sss", "Cannot prepare SQL statement (%s). %s", p->conf.format_query->ptr, mysql_stmt_error(stmt));
 		return HANDLER_ERROR;
 	}
 
@@ -537,10 +539,15 @@ REQUESTDONE_FUNC(mod_mysql_accesslog_write)
 			break;
 
 		case FORMAT_REMOTE_USER:
-			user_length = HANDLE_LEN(con->authed_user->used);
+			user_length = 0;
+			if (NULL != (ds = (data_string *)array_get_element(con->environment, "REMOTE_USER")) && ds->value->used > 1) {
+				user_length = HANDLE_LEN(ds->value->used);
+			} else {
+				b[j].length = &user_length;
+			}
 
 			b[j].buffer_type = MYSQL_TYPE_STRING;
-			b[j].buffer = con->authed_user->ptr;
+			b[j].buffer = ds->value->ptr;
 			b[j].buffer_length = 2048;
 			b[j].length = &user_length;
 			if (!user_length) {
